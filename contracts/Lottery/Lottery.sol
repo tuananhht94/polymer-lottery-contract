@@ -45,22 +45,26 @@ contract Lottery is CustomChanIbcApp {
         return uint256(keccak256(abi.encodePacked(blockValue, block.timestamp)));
     }
 
-    function pickWinner() public onlyOwner returns (address payable) {
+    function _pickWinner(
+        bytes32 channelId,
+        uint64 timeoutSeconds
+    ) private onlyOwner returns (WinnerHistory memory) {
         address payable winner = payable(players[random() % players.length]);
         uint256 amount = address(this).balance;
         winner.transfer(amount);
         players = new address[](0);
         counter = counter + 1;
         winnerHistories[counter] = WinnerHistory(winner, amount, counter, IbcPacketStatus.UNSENT);
+        sendPacket(channelId, timeoutSeconds, counter);
         emit Winner(winner, amount, counter);
-        return winner;
+        return winnerHistories[counter];
     }
 
     function sendPacket(
         bytes32 channelId,
         uint64 timeoutSeconds,
         uint256 _counter
-    ) external {
+    ) public {
         WinnerHistory storage winnerHistory = winnerHistories[_counter];
         require(winnerHistory.ibcPacketStatus == IbcPacketStatus.UNSENT || winnerHistory.ibcPacketStatus == IbcPacketStatus.TIMEOUT, "Packet already sent");
 
