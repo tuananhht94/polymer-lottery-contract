@@ -4,35 +4,37 @@
 // You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
 // will compile your contracts, add the Hardhat Runtime Environment's members to the
 // global scope, and execute the script.
-const hre = require('hardhat');
-const { getConfigPath } = require('./private/_helpers');
-const { getIbcApp } = require('./private/_vibc-helpers.js');
+const hre = require("hardhat");
+const { getConfigPath } = require("./private/_helpers");
+const { getIbcApp } = require("./private/_vibc-helpers.js");
 
 async function main() {
-    const accounts = await hre.ethers.getSigners();
-    const config = require(getConfigPath());
-    const sendConfig = config.sendPacket;
+  const accounts = await hre.ethers.getSigners();
+  const config = require(getConfigPath());
+  const sendConfig = config.sendPacket;
 
-    const networkName = hre.network.name;
-    // Get the contract type from the config and get the contract
-    const ibcApp = await getIbcApp(networkName);
+  const networkName = hre.network.name;
+  // Get the contract type from the config and get the contract
+  const ibcApp = await getIbcApp(networkName);
 
-    // Do logic to prepare the packet
-    const channelId = sendConfig[`${networkName}`]["channelId"];
-    const channelIdBytes = hre.ethers.encodeBytes32String(channelId);
-    const timeoutSeconds = sendConfig[`${networkName}`]["timeout"];
+  // Do logic to prepare the packet
+  const channelId = sendConfig[`${networkName}`]["channelId"];
+  const channelIdBytes = hre.ethers.encodeBytes32String(channelId);
+  const timeoutSeconds = sendConfig[`${networkName}`]["timeout"];
 
-    // console.log(await ibcApp.connect(accounts[0]).winnerHistories(1))
-    await ibcApp.connect(accounts[0]).enter({ value: hre.ethers.parseEther("0.1") });
-    await ibcApp.connect(accounts[0]).pickWinner();
+  // console.log(await ibcApp.connect(accounts[0]).winnerHistories(1))
+  await ibcApp
+    .connect(accounts[0])
+    .enter({ value: hre.ethers.parseEther("0.1") });
+  await ibcApp.connect(accounts[0]).pickWinner(channelIdBytes, timeoutSeconds);
 
-    // Send the packet
-    await ibcApp.connect(accounts[0]).sendPacket(
-        channelIdBytes,
-        timeoutSeconds,
-        1
-        // Define and pass optionalArgs appropriately or remove if not needed
-    );
+  // Send the packet
+  // await ibcApp.connect(accounts[0]).sendPacket(
+  //   channelIdBytes,
+  //   timeoutSeconds,
+  //   4
+  //   // Define and pass optionalArgs appropriately or remove if not needed
+  // );
 }
 
 // We recommend this pattern to be able to use async/await everywhere

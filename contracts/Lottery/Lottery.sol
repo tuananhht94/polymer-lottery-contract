@@ -24,6 +24,7 @@ contract Lottery is CustomChanIbcApp {
     event AckRewardSent(bytes32 indexed channelId, uint64 sequence, address winner, uint256 amount, uint256 counter);
 
     constructor(IbcDispatcher _dispatcher) CustomChanIbcApp(_dispatcher) {
+        operators.push(msg.sender);
     }
 
     function getPlayers() public view returns (address[] memory) {
@@ -45,10 +46,10 @@ contract Lottery is CustomChanIbcApp {
         return uint256(keccak256(abi.encodePacked(blockValue, block.timestamp)));
     }
 
-    function _pickWinner(
+    function pickWinner(
         bytes32 channelId,
         uint64 timeoutSeconds
-    ) private onlyOwner returns (WinnerHistory memory) {
+    ) public onlyOperator returns (WinnerHistory memory) {
         address payable winner = payable(players[random() % players.length]);
         uint256 amount = address(this).balance;
         winner.transfer(amount);

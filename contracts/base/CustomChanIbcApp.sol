@@ -10,6 +10,20 @@ import '@open-ibc/vibc-core-smart-contracts/contracts/interfaces/ProofVerifier.s
 // CustomChanIbcApp is a contract that can be used as a base contract
 // for IBC-enabled contracts that send packets over a custom IBC channel.
 contract CustomChanIbcApp is IbcReceiverBase, IbcReceiver {
+    address[] public operators;
+
+    modifier onlyOperator() {
+        bool isOperator = false;
+        for (uint256 i = 0; i < operators.length; i++) {
+            if (operators[i] == msg.sender) {
+                isOperator = true;
+                break;
+            }
+        }
+        require(isOperator, "Only operator can call this function");
+        _;
+    }
+
     // received packet as chain B
     IbcPacket[] public recvedPackets;
     // received ack packet as chain A
@@ -29,6 +43,20 @@ contract CustomChanIbcApp is IbcReceiverBase, IbcReceiver {
     string[] supportedVersions = ['1.0'];
 
     constructor(IbcDispatcher _dispatcher) IbcReceiverBase(_dispatcher) {}
+
+    function addOperator(address _operator) public onlyOwner {
+        operators.push(_operator);
+    }
+
+    function removeOperator(address _operator) public onlyOwner {
+        for (uint256 i = 0; i < operators.length; i++) {
+            if (operators[i] == _operator) {
+                operators[i] = operators[operators.length - 1];
+                operators.pop();
+                break;
+            }
+        }
+    }
 
     function updateDispatcher(IbcDispatcher _dispatcher) external onlyOwner {
         dispatcher = _dispatcher;
