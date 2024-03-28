@@ -21,13 +21,18 @@ async function main() {
     const channelId = sendConfig[`${networkName}`]["channelId"];
     const channelIdBytes = hre.ethers.encodeBytes32String(channelId);
     const timeoutSeconds = sendConfig[`${networkName}`]["timeout"];
-    
+
+    // console.log(await ibcApp.connect(accounts[0]).winnerHistories(1))
+    await ibcApp.connect(accounts[0]).enter({ value: hre.ethers.parseEther("0.1") });
+    await ibcApp.connect(accounts[0]).pickWinner();
+
     // Send the packet
     await ibcApp.connect(accounts[0]).sendPacket(
         channelIdBytes,
         timeoutSeconds,
-        // Define and pass optionalArgs appropriately or remove if not needed    
-        );
+        1
+        // Define and pass optionalArgs appropriately or remove if not needed
+    );
 }
 
 // We recommend this pattern to be able to use async/await everywhere
