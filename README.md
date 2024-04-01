@@ -1,3 +1,9 @@
+# Lottery App
+- Frontend: https://github.com/tuananhht94/polymer-lottery-app
+- Live demo: https://lottery.tuananh.xyz
+- Video demo: https://youtu.be/iveqCe5V9YA
+
+# How to run
 ## Run All Task
 
 ```bash
